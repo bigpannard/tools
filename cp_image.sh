@@ -166,6 +166,10 @@ for EXT in "${EXTENTIONS[@]}"; do
     ARGS+=("-o" "-iname *."${EXT})
 done
 ARGS+=( ")")
+ARGS+=("-type" "f")
+if [ ! -z "${SIZE}" ]; then
+    ARGS+=("-size" "${SIZE}")
+fi
 ARGS+=("-print0")
 
 FILE_COPIED=0
