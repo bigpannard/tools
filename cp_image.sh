@@ -9,6 +9,13 @@
 # --Destination Folder Destination
 # --Size Minimum file size (e.g., 100k, 2M)
 ##################################################################################################
+# Script Version History
+# V.0.0 - Initial version
+# V.0.1 - Added video mime types
+#
+##################################################################################################
+
+
 
 VERSION="V.0.0"
 LOG_TAG_NAME="Image_Copier"
