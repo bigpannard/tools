@@ -1,7 +1,7 @@
 #!/bin/bash
 # Install into ~/.local/bin
 INSTALL_DIR="$HOME/.local/share/bin"
-SCRIPT_NAME="cp_image.sh"
+SCRIPT_NAME="cp_media.sh"
 
 # Create INSTALL_DIR if it doesn't exist
 mkdir -p "$INSTALL_DIR" 
