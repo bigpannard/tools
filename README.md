@@ -2,4 +2,4 @@
 
 Folder to stock all my bash scripts to manage my computer
 
-- [Media Copy](cp_media.md)
+- [Media Copy](cp_media.md) - copy media from source directory to destiantion directory
