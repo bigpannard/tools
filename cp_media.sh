@@ -244,17 +244,17 @@ function copy_videos_prepared_args(){
 # Rename a file to allow copy
 function rename_file()
 {
-    printM 0 "Rename file $1"
+    printM 0 "\tRename file $1"
     BASE_NAME=$(basename "$1")
     EXT="${BASE_NAME##*.}" 
     FILENAME="${BASE_NAME%.*}"
     let COUNTER=1
     NEW_FILENAME="${FILENAME}_c${COUNTER}.${EXT}"
-    while [ -f "${$2}/${NEW_FILENAME}" ]; do
+    while [ -f "$2/${NEW_FILENAME}" ]; do
         let COUNTER+=1
         NEW_FILENAME="${FILENAME}_c${COUNTER}.${EXT}"
     done
-    printM 0 "Renamed to ${NEW_FILENAME}"
+    printM 0 "\tRenamed to ${NEW_FILENAME}"
     return 0
 }
 
