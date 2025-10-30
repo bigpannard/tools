@@ -262,6 +262,7 @@ function rename_file()
 #########################################################################################
 # Main script execution starts here
 # Check input parameters
+printM 1 "CP_MEDIA version ${VERSION}"
 check_parameters "$@"
 
 
@@ -283,6 +284,13 @@ esac
 FILE_COPIED=0
 FILE_RENAMED=0
 FILE_NOT_COPIED=()
+
+read -p "Do you want to continue? [y,n]:" START
+
+if [ "${START}" != "y" ]; then
+    printM 1 "Process stop by user"
+    exit 0
+fi
 
 while IFS= read -r -d '' FICHIER <&3; do
     printM 0 "File found: $FICHIER"
