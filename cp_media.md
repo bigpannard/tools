@@ -17,6 +17,8 @@ cp_image --source {SOURCEFOLDER} --destination {DESTINATIONFOLDER} --images|--vi
 * `--size`: Is the size parameter from find command e.g. +500k +1M +1G
 * `--verbose`: Set verbose mode to explain everystep into console
 
+![cp_media schema](cp_media.sh.excalidraw.png)
+
 ## Installation
 
 Installation is not mandatory you can run the script directly.

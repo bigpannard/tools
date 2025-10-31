@@ -259,6 +259,36 @@ function rename_file()
 }
 
 
+# -----------------------------------------------------------------------------
+# Function: checkfiles_baseon_sha256
+# Usage: checkfiles_baseon_sha256 <file1> <file2>
+#
+# Description:
+#   Compares the SHA256 checksums of two files to determine if they are identical.
+#
+# Parameters:
+#   $1 - Path to the first file.
+#   $2 - Path to the second file.
+#
+# Returns:
+#   0 - If both files have the same SHA256 checksum (files are identical).
+#   1 - If the files have different SHA256 checksums (files are different).
+#
+# Notes:
+#   - Requires 'cksum' with SHA256 support.
+#   - Uses 'awk', 'uniq', and 'wc' for processing checksum output.
+# -----------------------------------------------------------------------------
+function checkfiles_baseon_sha256()
+{
+    local CHK=$(cksum --algorithm=sha256 "$1" "$2" | awk '{print $4}' | uniq | wc -l)
+    if [ ${CHK} -eq 1 ]; then
+        return 0
+    else    
+        return 1
+    fi
+}
+
+
 #########################################################################################
 # Main script execution starts here
 # Check input parameters
@@ -316,9 +346,10 @@ while IFS= read -r -d '' FICHIER <&3; do
         printM 0 "\tFile already exists at destination, new filename will be created for: $FICHIER"
         SOURCE_SIZE=$(stat -c%s ${FICHIER})
         DESTINATION_SIZE=$(stat -c%s ${DESTINATION_FILE_NAME})
-        if ! [ ${SOURCE_SIZE} -eq ${DESTINATION_SIZE} ]; then
-            #Same Name but size different
-            printM 0 "\tSame Filename but size different source:${SOURCE_SIZE}o destiantion:${DESTINATION_SIZE}o"
+        checkfiles_baseon_sha256 ${FICHIER} ${DESTINATION_FILE_NAME}
+        if [ ! ${?} -eq 0 ]; then
+            #Same Name but sha256 different
+            printM 0 "\tSame Filename but sha256 -> source:${SOURCE_SIZE}o destiantion:${DESTINATION_SIZE}o"
             rename_file ${FICHIER} ${DESTINATION_FOLDER}
             printM 0 "\tCopying file with a new name: $NEW_FILENAME"
             cp -v "$FICHIER" "$DESTINATION_FOLDER/$NEW_FILENAME"
