@@ -38,4 +38,5 @@ Installation is not mandatory you can run the script directly.
     ./cp_image.sh --source /home/$USER/ --destination /tmp/$USER/IMG/ --images --size +500k
 ```
 
+[Video on PeerTube](https://peertube.mesnumeriques.fr/w/vmhFckc7qFPaDvgEQ9GDPr)
 [<- Main Page>](README.md)
