@@ -279,8 +279,8 @@ function rename_file()
 #   - Uses 'awk', 'uniq', and 'wc' for processing checksum output.
 # -----------------------------------------------------------------------------
 function checkfiles_baseon_sha256()
-{
-    local CHK=$(cksum --algorithm=sha256 "$1" "$2" | awk '{print $4}' | uniq | wc -l)
+{ 
+    local CHK=$(cksum --algorithm=sha256 "$1" "$2" | awk '{print $1}' | uniq | wc -l)
     if [ ${CHK} -eq 1 ]; then
         return 0
     else    
@@ -330,7 +330,6 @@ while IFS= read -r -d '' FICHIER <&3; do
     if [ ! -f "${DESTINATION_FILE_NAME}" ]; then
         printM 0 "\tFile not exist in destiantion folder: ${FICHIER}" 
         printM 0 "\tCopying file: ${FICHIER} to ${DESTINATION_FOLDER}"
-        
         # Copy the file to destianation folder
         cp -v "$FICHIER" "$DESTINATION_FOLDER"
         if [ "$?" -eq 0 ]; then
@@ -344,13 +343,11 @@ while IFS= read -r -d '' FICHIER <&3; do
     else
         # File already exists 
         printM 0 "\tFile already exists at destination, new filename will be created for: $FICHIER"
-        SOURCE_SIZE=$(stat -c%s ${FICHIER})
-        DESTINATION_SIZE=$(stat -c%s ${DESTINATION_FILE_NAME})
-        checkfiles_baseon_sha256 ${FICHIER} ${DESTINATION_FILE_NAME}
+        checkfiles_baseon_sha256 "${FICHIER}" "${DESTINATION_FILE_NAME}"
         if [ ! ${?} -eq 0 ]; then
             #Same Name but sha256 different
-            printM 0 "\tSame Filename but sha256 -> source:${SOURCE_SIZE}o destiantion:${DESTINATION_SIZE}o"
-            rename_file ${FICHIER} ${DESTINATION_FOLDER}
+            printM 0 "Sames Name but check sum different"
+            rename_file "${FICHIER}" "${DESTINATION_FOLDER}"
             printM 0 "\tCopying file with a new name: $NEW_FILENAME"
             cp -v "$FICHIER" "$DESTINATION_FOLDER/$NEW_FILENAME"
             if [ "$?" -eq 0 ]; then
@@ -367,7 +364,7 @@ while IFS= read -r -d '' FICHIER <&3; do
             FILE_NOT_COPIED+=("${FICHIER}")
         fi
     fi
-done 3< <(find ${SOURCE_FOLDER} ${ARGS[@]})
+done 3< <(find "${SOURCE_FOLDER}" ${ARGS[@]})
 
 #### PRINT REPORT
 printM 1 "##################Final Report#######################################"
