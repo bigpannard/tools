@@ -10,14 +10,17 @@ cp_image --source {SOURCEFOLDER} --destination {DESTINATIONFOLDER} --images|--vi
 
 ## Option
 
-* `--source`: Source folder where the images are stored
+* `--source`: Source folder where the images are stored. Warning source folder should be different of the working directory
 * `--destination`: Destination folder where the images will be store (multiple file with the same name will be rename like filename_cX.* where X is a counter)
 * `--images`:Export only images (extension come from mime type file)
-* `--videos`:Export only videoss (extension come from mime type file)
+* `--videos`:Export only videos (extension come from mime type file)
+* `--audios`:Export only audios (extension come from mime type file)
+* `--all`: Export all files from all subfolders to destiantion folder
 * `--size`: Is the size parameter from find command e.g. +500k +1M +1G
 * `--verbose`: Set verbose mode to explain everystep into console
 
 ![cp_media schema](cp_media.sh.excalidraw.png)
+picture not yet updated
 
 ## Installation
 

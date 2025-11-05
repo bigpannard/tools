@@ -15,12 +15,10 @@
 # V.0.1 - Added video mime types
 # V.0.2 - Added final report with total files copied and renamed 
 # V.0.3 - Added video copy mode
-#
+# V.0.4 - Added audio copy mode and all
 ##################################################################################################
 
-
-
-VERSION="V.0.3"
+VERSION="V.0.4"
 LOG_TAG_NAME="Media_Copier"
 FOLDER_PATH=""
 MODE=0
@@ -73,7 +71,7 @@ function printM(){
 }
 
 # Set mode function to set MODE variable
-# $1 = mode (1=images,2=videos)
+# $1 = mode (1=images,2=videos,3=audio,4=other)
 # returns 0 if mode is set, 1 if error  
 # Only one mode can be set at a time
 function set_mode(){
@@ -90,15 +88,22 @@ function set_mode(){
 # returns SOURCE_FOLDER variable
 function set_source_folder(){
     SOURCE_FOLDER="$1"
-    # Check if folder ends with /
-    check_folder_slash "${SOURCE_FOLDER}"
-    SOURCE_FOLDER=$FOLDER_PATH
-
     # check if source folder exists
     if [ ! -d "${SOURCE_FOLDER}" ]; then
         printM 3 "Error: Source folder ${SOURCE_FOLDER} does not exist."
         printM 3 "Script Exiting"
         exit 1
+    else
+        SOURCE_FOLDER=$(realpath "$SOURCE_FOLDER")
+        # Prob with the find command when you are in the same working directory
+        if [ "${SOURCE_FOLDER}" = "$(pwd)" ]; then
+            printM 3 "Error: Source Folder cannot be the same of the working directory"
+            exit 1
+        fi
+        # Check if folder ends with /
+        check_folder_slash "${SOURCE_FOLDER}"
+        SOURCE_FOLDER=$FOLDER_PATH
+
     fi
 
     printM 1 "Source Folder set to ${SOURCE_FOLDER}"
@@ -134,7 +139,7 @@ function set_destination_folder(){
 #  Print_help_message
 #  Print on screen how use this package
 function print_help_message(){
-    echo "Usage: $0 --source [folderPath] --destination [DestinationPath] [--size minFileSize] [--images|--videos]"
+    echo "Usage: $0 --source [folderPath] --destination [DestinationPath] [--size minFileSize] [--images|--videos|--audios|--all]"
     echo "Example: $0 --source /home/user/Pictures --destination /mnt/backup/Pictures --size 200k --images"
 }   
 
@@ -167,6 +172,14 @@ function check_parameters(){
         --videos) 
             set_mode 2;
             printM 1 "Video mode enabled."
+        ;;
+        --audios) 
+            set_mode 3;
+            printM 1 "Video mode enabled."
+        ;;
+        --all) 
+            set_mode 4;
+            printM 1 "All file mode enabled."
         ;;
         --verbose) 
             VERBOSE=1;
@@ -212,17 +225,26 @@ function mime_type_parsing(){
 # returns ARGS array with find command arguments
 function prepare_args(){
     # Build find command arguments
-    ARGS=( "( -iname *."${EXTENTIONS[0]})
-    unset EXTENTIONS[0]
-    for EXT in "${EXTENTIONS[@]}"; do
-        ARGS+=("-o" "-iname *."${EXT})
-    done
-    ARGS+=( ")")
+    if [ ! ${#EXTENTIONS[@]} -eq 0 ]; then
+        ARGS=( "( -iname *."${EXTENTIONS[0]})
+        unset EXTENTIONS[0]
+        for EXT in "${EXTENTIONS[@]}"; do
+            if [ -z ${EXT} ]; then
+                echo "Chaine Vide"
+            else
+                ARGS+=("-o" "-iname *."${EXT})
+            fi
+        done
+        ARGS+=( " )")
+    fi
+
     ARGS+=("-type" "f")
     if [ ! -z "${SIZE}" ]; then
         ARGS+=("-size" "${SIZE}")
     fi
+    
     ARGS+=("-print0")
+
 }
 
 # Copy images with prepared arguments
@@ -238,6 +260,19 @@ function copy_images_prepared_args(){
 function copy_videos_prepared_args(){
     # Get video mime types from mime.types file
     mime_type_parsing "video"
+    prepare_args
+}
+
+# Copy audios with prepared arguments
+function copy_audios_prepared_args(){
+    # Get video mime types from mime.types file
+    mime_type_parsing "audio"
+    prepare_args
+}
+
+# Copy all with prepared arguments
+function copy_all_prepared_args(){
+    # Get video mime types from mime.types file
     prepare_args
 }
 
@@ -306,6 +341,14 @@ case ${MODE} in
         printM 1 "Video mode selected."
         copy_videos_prepared_args 
     ;;
+    3) 
+        printM 1 "Audio mode selected."
+        copy_audios_prepared_args 
+    ;;
+    4) 
+        printM 1 "All files mode selected."
+        copy_all_prepared_args 
+    ;;
     *) printM 3 "Error: Invalid mode selected. Use --images or --videos."
        printM 3 "Script Exiting"
        exit 1 ;;
@@ -321,6 +364,7 @@ if [ "${START}" != "y" ]; then
     printM 1 "Process stop by user"
     exit 0
 fi
+
 
 while IFS= read -r -d '' FICHIER <&3; do
     printM 0 "File found: $FICHIER"
@@ -364,18 +408,18 @@ while IFS= read -r -d '' FICHIER <&3; do
             FILE_NOT_COPIED+=("${FICHIER}")
         fi
     fi
-done 3< <(find "${SOURCE_FOLDER}" ${ARGS[@]})
+done 3< <(find ${SOURCE_FOLDER} ${ARGS[@]})
 
 #### PRINT REPORT
-printM 1 "##################Final Report#######################################"
-printM 1 "File copy process completed."
-printM 1 "Total files copied: $FILE_COPIED"
-printM 1 "Total files renamed due to duplicates: $FILE_RENAMED"
-printM 1 "#####################################################################"
 if [ "${#FILE_NOT_COPIED[@]}" -gt 0 ]; then
-    printM 2 "Files not be copied: ${#FILE_NOT_COPIED[@]}"
+    printM 2 "Files not copied: ${#FILE_NOT_COPIED[@]}"
     for FILE in "${FILE_NOT_COPIED[@]}"; do
         printM 2 "$FILE"
     done
-    printM 1 "#####################################################################"
 fi  
+printM 1 "##################Final Report#######################################"
+printM 1 "File copy process completed."
+printM 1 "Total files copied: $FILE_COPIED"
+printM 1 "Total files renamed: $FILE_RENAMED"
+printM 1 "Total files not copied: ${#FILE_NOT_COPIED[@]}"
+printM 1 "#####################################################################"
